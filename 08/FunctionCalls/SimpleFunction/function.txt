@@ -1,0 +1,38 @@
+//declare funciton Label
+(FUNCTION_SimpleFunction.test)
+
+//go to where the Stack Pointer points
+@SP
+A=M
+
+//initialize local variables with 0
+@SP
+M=M+1
+AM=M-1
+M=0
+
+@SP
+M=M+1
+AM=M-1
+M=0
+
+//push local 0
+@0
+D=A
+@LCL
+A=D+M
+D=M
+@SP
+M=M+1
+A=M-1
+
+//push local 1
+@1
+D=A
+@LCL
+A=D+M
+D=M
+@SP
+M=M+1
+A=M-1
+

@@ -1,0 +1,171 @@
+class CarGame{
+	field int playerPosition;
+	field Array grid;
+
+	field int points;
+	field int animationWaitTimer;
+	field int spawnReset;
+	field int spawnWaitTimer;
+
+	
+	field RandNumGenerator generator;
+
+
+	
+	constructor CarGame new(seed) {
+		let playerPosition = 111; //initializes the player at the middle position
+		let grid = Array.new(216); //constructs a grid of all physical positions ingame;
+		
+		let points = 0; //initializes the score
+		let animationWaitTimer = 10; //10 milliseconds 
+		let spawnReset = 100 / animationWaitTimer; // 1 second, divided by the duration of 1 frame
+		let spawnWaitTimer = spawnReset;
+		
+		let generator = RandNumGenerator.new(seed);
+
+		return this;
+	}
+	
+	/**Draws the next car onto the grid, if the spawn timer is up */
+	method void spawnCar() {
+		if (spawnWaitTimer = 0) {
+			let spawnWaitTimer = spawnReset;
+			var int position = generator.getNumber(); //gets the number from 1 to 3 of the new column onto which to spawn the car
+			
+			let grid[position * 1] = 1; let grid[position * 26] = 1;
+			let grid[position * 3] = 1; let grid[position * 49] = 1;
+			let grid[position * 24] = 1; let grid[position * 50] = 1;
+			let grid[position * 25] = 1; let grid[position * 51] = 1;
+		}
+		
+		else {
+			let spawnWaitTimer = spawnWaitTimer - 1;
+		}
+		return;
+	}
+	
+	/** Checks if a car reached the end of the road, in which case score gets increased by 1 */
+	method void addPoint() {
+		if ((grid[44] = 1) | (grid[116] = 1) | (grid[188] = 1)) {
+			let points = points + 1;
+			let spawnReset = spawnReset -1;
+		}
+		return;
+	}
+	
+	/** Shifts all cars down*/
+	method void shiftGrid() {
+		var int j; let j = 1;
+		while (j < 4) {
+			var int i; let i = (j * 24 - 1);
+			while (i > (j-1) * 24) {
+				let grid[i] = grid[i-1];
+			}
+			grid[(j-1) * 24] = 0;
+			
+			let j = j-1;
+		}
+		return;
+	}
+	
+	method void updateGrid() {
+		do spawnCar();
+		do shiftGrid();
+		do addPoint();
+		do Sys.wait(animationWaitTimer);
+		let animationWaitTimer =  animationWaitTimer - (points / 10);
+		
+		return;
+		
+	}
+	
+	method void checkCollision() {
+		if ((grid[playerPosition] = 1) | (grid[playerPosition + 1] = 1))
+			let crash = 1;
+		return;
+	}
+	
+	method void movePlayerLeft() {
+		if (playerPosition = 111) {let playerPosition = 39;}
+		if (playerPosition = 183) {let playerPosition = 111;}
+		return;
+	}
+	
+	method void movePlayerRight() {
+		if (playerPosition = 111) {let playerPosition = 183;}
+		if (playerPosition = 39) {let playerPosition = 111;}
+		return;
+	}
+	
+	method void renderCars() {
+		var int j; let j = 0;
+		while (j < 9) {
+			var int i; let i = (j * 24) + 4;
+			while (i < ((j * 24) + 20)) {
+				if (grid[i] = 1) {
+					do Screen.setColor(true);
+					do Screen.drawRectangle( (256+(j*16)), ((i%24)-4), (256+(j*16))+16, (256+(j*16))+16);
+				}
+				else {
+					do Screen.setColor(false);
+					do Screen.drawRectangle( (256+(j*16)), ((i%24)-4), (256+(j*16))+16, (256+(j*16))+16);
+				}
+				let i = i + 1;
+			}
+			let j = j + 1;
+		}
+				
+	}
+	
+	method void renderPlayer() {
+		if (playerPosition = 39) {
+			Screen.setColor(true);
+			do Screen.drawRectangle(256, 160, 304, 224);
+		}
+		else if (playerPosition = 111) {
+			Screen.setColor(true);
+			do Screen.drawRectangle(304, 160, 352, 224);
+		}
+		else if (playerPosition = 183) {
+			Screen.setColor(true);
+			do Screen.drawRectangle(352, 160, 400, 224);
+		}
+	}
+	
+	method void renderScore() {
+		Output.printString("Score: ");
+		Output.printInt(points);
+		Output.moveCursor(0, 0);
+	}
+	
+	method void render() {
+		do renderCars();
+		do renderPlayer();
+		do renderScore();
+	}
+	
+	method void run () {
+		var char key;
+		
+		while (~crash) {
+			while (key = 0) {
+				let key = Keyboard.keyPressed();
+				updateGrid();
+				checkCollision();
+				do render();
+			}
+			
+			if ((key = 65) | (key = 130)) {do movePlayerLeft();}
+			if ((key = 68) | (key = 132)) {do movePlayerRight();}
+			
+			while (key = 0) {
+				let key = Keyboard.keyPressed();
+				updateGrid();
+				checkCollision();
+				do render();
+			}
+		}
+		
+		return;		
+	}
+}

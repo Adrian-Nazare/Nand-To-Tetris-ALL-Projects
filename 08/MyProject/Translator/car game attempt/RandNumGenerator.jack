@@ -1,0 +1,18 @@
+
+class RandNumGenerator {
+	field int currentSeed;
+	
+	constructor RandNumGenerator new(seed) {
+		let currentSeed = seed;
+	}
+	
+	method int getNumber() {
+		seed = (seed * 7) / 3;
+		if (seed < 0) {
+			return (((-seed) % 3) + 1);
+		}
+		else{
+			return ((seed % 3) + 1);
+		}
+	}
+}

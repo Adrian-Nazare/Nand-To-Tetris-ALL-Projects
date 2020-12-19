@@ -1,0 +1,18 @@
+class Main {
+	function void main() {
+		
+		var int key; let key = 0;
+		var int seed; let seed = 0;
+		
+		while (key = 0) {
+			let key = Keyboard.keyPressed();
+			let seed = seed + 1;
+		}
+		
+		var CarGame game;
+		let game = CarGame.new(seed);
+		do game.run();
+		do game.dispose();
+		return;
+	}
+}
