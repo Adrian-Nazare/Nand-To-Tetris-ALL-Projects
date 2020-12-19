@@ -1,0 +1,156 @@
+/** Implements the Ball object, that tracks the position of the ball in 2D space, 
+ * draws the ball onto the screen and updates spacial coordinates,
+ * and physical parameters with each movement tick 
+ */
+
+class Ball{
+	//We use a virtual 2048*1024 xy grid for plotting position and calculating velocity in order to achieve a smoother movement 
+	field int xPosition; field int yPosition;
+
+	field int xVelocity; field int yVelocity;
+	field int yGravity;
+
+	//the "physical" position of the ball is achieved by shrinking down the virtual grid by a factor of 4,
+	//and then drawing the ball. We use coordonates for the previous position in order to erase the previous position of the ball
+	field int xPositionScreen; field int yPositionScreen;
+	field int ex_xPositionScreen; field int ex_yPositionScreen;
+
+	field int ballRadius;
+	//Upon collision, the X and/or Y velocity changes sign and shrinks by bounciness%
+	field int bounciness;
+
+	/** Constructs a new ball object */
+	constructor Ball new() {
+		let xPositionScreen = 10; let yPositionScreen = 10;
+		let ex_xPositionScreen = 10; let ex_yPositionScreen = 10;
+
+		let xPosition = 40; let yPosition = 40;
+		let xVelocity = 15; let yVelocity = 0;
+		let yGravity = 5;
+
+		let ballRadius = 9;
+		let bounciness = 90; //percentage
+		return this;
+	}
+
+	/** Checks to see if the next movement tick of the ball were to put it over the edge of the screen */
+	method void checkCollision() {
+	//if there is a collision, the velocity responsible changes size and is shrunk by bounciness %
+		//Compromise: we use 2 formulas to recalculate velocity in order to avoid an integer overflow, and to avoid losing 
+		//too much precision of the new velocity value (due to only working with integers upon calculating percentages)
+		if ( ((((xPosition + xVelocity) / 4) - ballRadius) < 0) | ((((xPosition + xVelocity) / 4) + ballRadius) > 511) ) {
+			if ( (xVelocity > 200) | (xVelocity < (- 200)) ) {
+				let xVelocity = - ((xVelocity / 100) * bounciness);}
+			else {
+			let xVelocity = - ((xVelocity * bounciness) / 100);}
+			
+		}
+
+		if ( ((((yPosition + yVelocity) / 4) - ballRadius) < 0) | ((((yPosition + yVelocity) / 4) + ballRadius) > 255) ) {
+			if ( (yVelocity > 200) | (yVelocity < (- 200)) ) {
+				let yVelocity = - ((yVelocity / 100) * bounciness);}
+			else {
+			let yVelocity = - ((yVelocity * bounciness) / 100);}
+
+		}
+
+		return;
+	}
+
+	/** Upon passing the collision check and updating the virtual coordinates, update physical screen coord: */
+	method void updateScreenCoord() {
+		let ex_xPositionScreen = xPositionScreen;
+		let ex_yPositionScreen = yPositionScreen;
+		let xPositionScreen = xPosition / 4;
+		let yPositionScreen = yPosition / 4;
+		return;	
+	}
+
+	/** Erases the previous position of the ball and draws the new one at the updated position */
+	method void drawBall() {
+		do Screen.setColor(false);
+		do Screen.drawCircle(ex_xPositionScreen, ex_yPositionScreen, ballRadius);
+
+		do Screen.setColor(true);
+		do Screen.drawCircle(xPositionScreen, yPositionScreen, ballRadius);
+		
+		return;
+	}
+
+	/** The main method of the Ball object, advances the ball by one tick of xVelocity and yVelocity, 
+	 * and increases Y velocity by the amount of gravity */
+	method void move() {
+		do checkCollision();
+
+		let xPosition = xPosition + xVelocity; 
+		let yPosition = yPosition + yVelocity; 
+		let yVelocity = yVelocity + yGravity;
+
+		do updateScreenCoord();
+		do Sys.wait(50);
+		do drawBall();
+
+		
+		return;
+	}
+
+	
+	method void increaseXVelocity() {
+		let xVelocity = xVelocity + 3;
+		return;
+	}
+
+	method void decreaseXVelocity() {
+		let xVelocity = xVelocity - 3;
+		return;
+	}
+
+	method void increaseYVelocity() {
+		let yVelocity = yVelocity + 5;
+		return;
+	}
+
+	method void decreaseYVelocity() {
+		let yVelocity = yVelocity - 5;
+		return;
+	}
+
+
+	method void increaseBounciness() {
+		let bounciness = bounciness + 3;
+		return;
+	}
+
+	method void decreaseBounciness() {
+		let bounciness = bounciness - 3;
+		return;
+	}
+
+	method void increaseGravity() {
+		let yGravity = yGravity + 2;
+		return;
+	}
+
+	method void decreaseGravity() {
+		let yGravity = yGravity - 2;
+		return;
+	}
+
+	method void increaseBallRadius() {
+		let ballRadius = ballRadius + 1;
+		return;
+	}
+
+	method void decreaseBallRadius() {
+		if (ballRadius > 0) {
+			let ballRadius = ballRadius - 1;}
+		return;
+	}
+
+	/** Disposes of the curent ball object */
+	method void dispose() {
+		do Memory.deAlloc(this);
+		return;
+	}
+
+}
