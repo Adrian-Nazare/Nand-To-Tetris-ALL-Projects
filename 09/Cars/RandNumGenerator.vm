@@ -1,0 +1,48 @@
+function RandNumGenerator.new 0
+push constant 1
+call Memory.alloc 1
+pop pointer 0
+push argument 0
+pop this 0
+push pointer 0
+return
+function RandNumGenerator.getNumber 1
+push argument 0
+pop pointer 0
+push this 0
+push constant 7
+call Math.multiply 2
+push constant 3
+call Math.divide 2
+pop this 0
+push this 0
+push constant 0
+lt
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push this 0
+neg
+push constant 3
+call RandNumGenerator.mod 2
+push constant 1
+add
+return
+goto IF_END0
+label IF_FALSE0
+push this 0
+push constant 3
+call RandNumGenerator.mod 2
+push constant 1
+add
+return
+label IF_END0
+function RandNumGenerator.mod 0
+push argument 0
+push argument 0
+push argument 1
+call Math.divide 2
+push argument 1
+call Math.multiply 2
+sub
+return

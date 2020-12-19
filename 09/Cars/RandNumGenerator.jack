@@ -1,0 +1,24 @@
+class RandNumGenerator {
+	field int currentSeed;
+	
+	constructor RandNumGenerator new (int seed) {
+		let currentSeed = seed;
+		return this;
+	}
+	
+	method int getNumber() {
+		var int numberToReturn;
+
+		let currentSeed = (currentSeed * 7) / 3;
+		if (currentSeed  < 0) {
+			return (RandNumGenerator.mod(-currentSeed, 3) + 1);
+		}
+		else{
+			return (RandNumGenerator.mod(currentSeed, 3) + 1);
+		}
+	}
+
+	function int mod(int a, int b){
+		return (a - ((a / b) * b) );
+	}
+}

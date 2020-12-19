@@ -1,0 +1,81 @@
+
+/**
+ * Implements a Bouncing ball game.
+ * This game is a simple physics simulator, with 2D velocity, vertical acceleration (gravity) 
+ * and collision at the edges of the screen
+ * When the game starts, a ball of radius 9 jumps from the top left corner of the screen
+ * As it bounces, the Player can increase/decrease X or Y velocity, Y gravity, ball size, 
+ * and "bounciness" of the ball by pressing the controlls mentioned below
+ * and written on the screen when the game starts
+ * The 'x' key is used to quit the game.
+ */
+
+class BallGame {
+	field Ball ball;
+
+	constructor BallGame new() {
+		let ball = Ball.new();
+		return this;
+	}
+
+	method void dispose() {
+		do ball.dispose();
+		do Memory.deAlloc(this);
+		return;
+	}
+
+	method void run() {
+		var char key;
+		var boolean exit;
+		let exit = false;
+		
+		//we print the instructions onto the screen, after which we wipe the screen and
+		//start the ball animation as soon as a key is pressed 
+
+		do Output.printString("Press right arrow to increase X Velocity"); do Output.println();
+		do Output.printString("Press left arrow to decrease X Velocity"); do Output.println();
+		do Output.printString("Press up arrow to increase Y Velocity"); do Output.println();
+		do Output.printString("Press down arrow to decrease Y Velocity"); do Output.println();
+		do Output.printString("Press W to increase gravity"); do Output.println();
+		do Output.printString("Press S to decrease gravity"); do Output.println();
+		do Output.printString("Press A to decrease ball size"); do Output.println();
+		do Output.printString("Press D to increase ball size"); do Output.println();
+		do Output.printString("Press Q to decrease bounciness"); do Output.println();
+		do Output.printString("Press E to increase bounciness"); do Output.println();
+		do Output.printString("Press X to Exit game");
+		do Output.println();
+		do Output.printString("Press any key to start game");
+
+		while (key = 0){
+			let key = Keyboard.keyPressed();
+		}
+		do Screen.setColor(false);
+		do Screen.drawRectangle(0, 0, 511, 255);		
+
+		while (~exit) {
+			while (key = 0) {
+				let key = Keyboard.keyPressed();
+				do ball.move();
+			}
+
+			if (key = 132) { do ball.increaseXVelocity(); }
+			if (key = 130) { do ball.decreaseXVelocity(); }
+			if (key = 131) { do ball.increaseYVelocity(); }
+			if (key = 133) { do ball.decreaseYVelocity(); }
+			if (key = 87) { do ball.increaseGravity(); }
+			if (key = 83) { do ball.decreaseGravity(); }
+			if (key = 68) { do ball.increaseBallRadius(); }
+			if (key = 65) { do ball.decreaseBallRadius(); }
+			if (key = 69) { do ball.increaseBounciness(); }
+			if (key = 81) { do ball.decreaseBounciness(); }
+			if (key = 88) {let exit = true; }
+
+			while (~(key = 0)) {
+				let key = Keyboard.keyPressed();
+				do ball.move();
+			}
+
+		}
+		return;
+	}
+}
