@@ -1,0 +1,200 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Keyboard.jack
+
+/**
+ * A library for handling user input from the keyboard.
+ */
+class Keyboard {
+	
+	/** Initializes the keyboard. */
+    function void init() {
+    	return;
+    } 
+
+    /**
+     * Returns the character of the currently pressed key on the keyboard;
+     * if no key is currently pressed, returns 0.
+     *
+     * Recognizes all ASCII characters, as well as the following keys:
+     * new line = 128 = String.newline()
+     * backspace = 129 = String.backspace()
+     * left arrow = 130
+     * up arrow = 131
+     * right arrow = 132
+     * down arrow = 133
+     * home = 134
+     * End = 135
+     * page up = 136
+     * page down = 137
+     * insert = 138
+     * delete = 139
+     * ESC = 140
+     * F1 - F12 = 141 - 152
+     */
+    function char keyPressed() {
+    	return Memory.peek(24576);
+    }
+
+    /**								
+     * Waits until a key is pressed on the keyboard and released,
+     * then echoes the key to the screen, and returns the character 
+     * of the pressed key.
+     */
+    function char readChar() {
+    	var char c;
+    	
+    	do Output.printChar(0); //display a black box as the cursor
+    	
+    	while (Keyboard.keyPressed() = 0) {} //do nothing, wait for a key to be pressed
+    	let c = Keyboard.keyPressed();
+    	while (~(Keyboard.keyPressed() = 0)) {} //do nothing, wait for the pressed key to be released
+    	
+    	//by displaying the black box at the cursor position, the real internal cursor is actually pushed further, 
+    	//so we need to go back onto the black box and erase it in order to write the character, if it is a printable character
+    	if ((c > 31) & (c < 127)) {
+    		do Output.backSpace(); //deletes the cursor before placing another character in its place
+        	do Output.printChar(c);	
+    	}
+    	else {
+    		do Output.backSpace(); //deletes the cursor before the next readChar call places another character in its place
+    	}
+    	
+    	return c;
+    }
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its value. Also handles user backspaces.
+     */
+    function String readLine(String message) {
+    	var String str; 
+    	var char c;
+    	    	
+    	let str = String.new(100);
+    	do Output.printString(message);
+    	
+    	while(true) {
+    		let c = Keyboard.readChar();
+    		if (c = 128) { // if c = newLine
+    			do Output.println();
+    			return str;
+    		}
+    		else {
+    			if (c = 129) { //if c = backSpace
+    				if (str.length() > 0) { // we make sure that backspace doesn't try to erase the last char for the case of an empty string
+    					do str.eraseLastChar();
+        				do Output.backSpace();
+        				
+        				//do Output.backSpace(); //we do Output.backSpace() twice in order to account for the cursor
+    				}
+    				else {
+    					//do Output.backSpace(); //delete the cursor that will be rewritten by readChar
+    				}
+    			}
+    			else {
+    				do str.appendChar(c);
+    			}
+    		}
+    	}
+    	return str; //dummy return statement as to avoid compilation errors, this should not be actually reached
+    }
+
+    /**								
+     * Displays the message on the screen, reads from the keyboard the entered
+     * text until a newline character is detected, echoes the text to the screen,
+     * and returns its integer value (until the first non-digit character in the
+     * entered text is detected). Also handles user backspaces. 
+     */
+    function int readInt(String message) {
+    	var char c; 
+    	var int num;
+    	var boolean isNumNeg; 
+    	var int inputLength;
+    	
+    	let num = 0; //we initialize the number
+    	//we initialize the negative flag and length of characters composing the number
+    	let isNumNeg = false;
+    	let inputLength = 0;
+    	    	 	
+    	do Output.printString(message);  	
+    		
+    	while (true) {
+    		let c = Keyboard.readChar();
+    		
+    		if (c = 128) { // if c = newLine
+    			do Output.println();
+    			
+    			if (isNumNeg) {
+    				return - num;
+    			}
+    			else {
+    				return num;
+    			}
+    		}
+    		else {
+    			if ((c > 47) & (c < 58)) { // if c is numeric
+    				let num = (num * 10) + (c - 48);
+    				let inputLength = inputLength + 1;
+    			}
+    			else { // if c is NOT numeric
+    				
+    				if ((c = 45) | (c = 129)) { //if it is the sign minus or backspace
+    					
+    					if (c = 45) {//if the symbol minus is entered, and we hadn't yet started adding to num, we set the negative flag to true, and increment inputLength by 1
+        					if (inputLength = 0) {
+        						let isNumNeg = true;
+            					let inputLength = inputLength + 1;
+        					}
+        					else { //the minus sign was entered illegally (not as the first character)
+        						if (isNumNeg) {
+        		    				return - num;
+        		    			}
+        		    			else {
+        		    				return num;
+        		    			}
+        					}
+        		    	}
+        				    				
+    					else { // if c = 129 (backSpace)
+        					if (inputLength = 0) {}//do nothing if we haven't started adding characters yet
+        					else { //inputLength > 0
+        						if (inputLength = 1) {
+        							if (isNumNeg) { //number is negative, there is a negative sign as first character
+        								do Output.backSpace();
+        	        					let isNumNeg = false;
+        	        					let inputLength = inputLength - 1;
+        							}
+        							else { //number is 1 digit long, positive
+        								let num = num / 10;
+        	        					do Output.backSpace();
+        	        					let inputLength = inputLength - 1;
+        							}
+        						}
+        						else { //inputLength > 1
+        							let num = num / 10;
+    	        					do Output.backSpace();
+    	        					let inputLength = inputLength - 1;
+        						}
+        					} 					
+        				}
+    				}
+    				
+    				else { //if it is some other illegal character
+    					let isNumNeg = false; 
+    					if (isNumNeg) {
+    	    				return - num;
+    	    			}
+    	    			else {
+    	    				return num;
+    	    			}
+    				}
+    			}
+    		}
+    	}
+    	return num; //dummy return statement as to avoid compilation errors, this should not be actually reached
+    }
+    
+}
